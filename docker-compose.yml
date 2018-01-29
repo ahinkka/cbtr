@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  ui:
+    build: ui
+    ports:
+      - "8080"
+    environment:
+      RECOMMENDERS: "random::recrnd:8090"
+
+  recrnd:
+    build: recommenders/random
+    ports:
+      - "8090"
+
+  # db:
+  #   image: postgres:10-alpine
+  #   volumes:
+  #     - "./volumes/db/pg_data:/var/lib/postgresql/data" # host-relative-path:path-within-container

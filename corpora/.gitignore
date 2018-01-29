@@ -1,0 +1,5 @@
+__pycache__/
+categories.txt
+enwiki-20140707-corpus.xml
+fiwiki-20140809-corpus.xml
+xml2txt.pl
