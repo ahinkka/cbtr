@@ -20,6 +20,8 @@ def read_articles(indir):
     return result
 
 
+# TODO: we should precompute all similarities as per
+#       https://stackoverflow.com/a/12128777, now we use the feature vectors
 def make_tfidf_model(articles, n_features=1000):
     # n_features is basically the number of words from the vocab to include
     tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, max_features=n_features)

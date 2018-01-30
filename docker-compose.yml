@@ -6,7 +6,7 @@ services:
     ports:
       - "8080"
     environment:
-      RECOMMENDERS: "random::recrnd:8090|tfidf::rectfidf:8091"
+      RECOMMENDERS: "random::recrnd:8090|tfidf::rectfidf:8091|lda::reclda:8092"
 
   recrnd:
     build: recommenders/random
@@ -17,6 +17,11 @@ services:
     build: recommenders/tfidf
     ports:
       - "8091"
+
+  reclda:
+    build: recommenders/lda
+    ports:
+      - "8092"
 
   # db:
   #   image: postgres:10-alpine
