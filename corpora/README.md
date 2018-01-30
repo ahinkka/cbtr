@@ -32,6 +32,7 @@ Further actually extract into separate files per article:
 
 `python3 extract_to_files.py output.txt ../ui/articles`
 
-Prepare a list of article ids for the random recommender:
+Prepare models:
 
 `python3 ../recommenders/random/make_model.py ../ui/articles ../recommenders/random/article_ids.txt`
+`python3 ../recommenders/tfidf/make_model.py ../ui/articles ../recommenders/tfidf/model.pickle`

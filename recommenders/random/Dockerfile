@@ -1,6 +1,6 @@
 FROM python:3.6-alpine
 MAINTAINER Atte Hinkka
-EXPOSE 8080/tcp
+EXPOSE 8090/tcp
 
 COPY app.py /app.py
 COPY bottle.py /bottle.py
