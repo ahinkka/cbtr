@@ -1,4 +1,5 @@
 import pickle
+import operator
 import os
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -12,10 +13,7 @@ def read_articles(indir):
     for index, item in enumerate(os.listdir(indir)):
         id = item.strip().replace('.txt', '')
         with open(os.path.join(indir, item), 'r') as f:
-            lines = f.readlines()
-            title = lines[0].strip()
-            contents = '\n'.join(lines[1:])
-            result[index] = (id, title, contents)
+            result[index] = (id, f.read())
 
     return result
 
@@ -40,11 +38,10 @@ if __name__ == '__main__':
     print('Read {} articles'.format(len(articles)))
 
     id_to_content = {}
-    id_to_title = {}
     id_to_article_id = {}
     article_id_to_id = {}
     for id, triple in articles.items():
-        id_to_article_id[id], id_to_title[id], id_to_content[id] = triple
+        id_to_article_id[id], id_to_content[id] = triple
         article_id_to_id[triple[0]] = id
 
     contents_sorted_by_id = [b

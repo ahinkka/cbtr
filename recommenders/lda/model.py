@@ -37,10 +37,7 @@ def read_articles(indir):
     for index, item in enumerate(os.listdir(indir)):
         id = item.strip().replace('.txt', '')
         with open(os.path.join(indir, item), 'r') as f:
-            lines = f.readlines()
-            title = lines[0].strip()
-            contents = '\n'.join(lines[1:])
-            result[index] = (id, title, contents)
+            result[index] = (id, f.read())
 
     return result
 
@@ -72,18 +69,32 @@ def build_model(indir):
     print('Read {} articles'.format(len(articles)))
 
     id_to_content = {}
-    id_to_title = {}
     id_to_article_id = {}
     article_id_to_id = {}
     for id, triple in articles.items():
-        id_to_article_id[id], id_to_title[id], id_to_content[id] = triple
+        id_to_article_id[id], id_to_content[id] = triple
         article_id_to_id[triple[0]] = id
 
     contents_sorted_by_id = [b
                              for a, b in sorted(id_to_content.items(),
                                                 key=operator.itemgetter(0))]
     term_doc_matrix, feature_names = make_term_frequency_model(contents_sorted_by_id)
-    lda, doc_topic_model = make_model(term_doc_matrix)
+
+    n_topics = 10
+    best_model = None, None
+    lowest_perplexity = 100000000
+    while True:
+        lda, doc_topic_model = make_model(term_doc_matrix, n_components=n_topics)
+        perplexity = lda.perplexity(term_doc_matrix)
+        print('Topic count', n_topics, 'PPL', perplexity)
+        if perplexity < lowest_perplexity:
+            best_model = lda, doc_topic_model
+            lowest_perplexity = perplexity
+            print('Best model, topic count', n_topics, 'with a perplexity of', perplexity)
+
+        n_topics += 1
+        if n_topics > 20:
+            break
 
     result = Model(article_id_to_id=article_id_to_id, id_to_article_id=id_to_article_id,
                    article_vector=doc_topic_model, topic_vector=lda.components_,
@@ -155,3 +166,5 @@ if __name__ == '__main__':
             for id, distance in recommendations:
                 print('{}\t{}\t{}'.format(model.id_to_article_id[matrix_id],
                                           model.id_to_article_id[id], distance))
+    else:
+        parser.error('unknown command')

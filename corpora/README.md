@@ -32,7 +32,12 @@ Further actually extract into separate files per article:
 
 `python3 extract_to_files.py output.txt ../ui/articles`
 
+Prepare a stemmed and stopword-removed version for the models:
+
+`python3 stem_and_remove_stop_words.py ../ui/articles articles --language <language>`
+
 Prepare models:
 
-`python3 ../recommenders/random/make_model.py ../ui/articles ../recommenders/random/article_ids.txt`
-`python3 ../recommenders/tfidf/make_model.py ../ui/articles ../recommenders/tfidf/model.pickle`
+`python3 ../recommenders/random/make_model.py articles-cleaned ../recommenders/random/article_ids.txt`
+`python3 ../recommenders/tfidf/make_model.py articles-cleaned ../recommenders/tfidf/model.pickle`
+

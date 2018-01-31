@@ -14,6 +14,11 @@ def slugify(value):
     return re.sub('[-\s]+', '-', value)
 
 
+def strip_html(data):
+    p = re.compile(r'<.*?>')
+    return p.sub('', data)
+
+
 def write_article(outdir, article_name, contents):
     outfile = os.path.join(outdir, slugify(article_name) + '.txt')
     if os.path.exists(outfile):
@@ -40,7 +45,7 @@ def extract(input, outdir):
 
             write_article(outdir,
                           current_article_name,
-                          ''.join([current_article_name] + line_buffer[1:-1]))
+                          ''.join([current_article_name + '\n'] + line_buffer[1:-1]))
             current_article_name = None
 
         line_buffer.append(line)
