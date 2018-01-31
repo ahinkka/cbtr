@@ -1,20 +1,10 @@
-'''
-terms are words in the corpus
-set of all terms is the vocabulary
-corpus consists of documents or articles
-lda is a topic model that maps topics to terms
-we are interested in document vectors (or embeddings)
-in lda case document vectors are vectors of weights for each topic
-this is left here as a joke so that every successive line is longer than the previous
-'''
 import collections
 import operator
 import os
 import pickle
 
 try:
-    from sklearn.feature_extraction.text import CountVectorizer
-    from sklearn.decomposition import LatentDirichletAllocation
+    from sklearn.feature_extraction.text import TfidfVectorizer
 except:
     pass
 from scipy.spatial import distance
@@ -24,7 +14,7 @@ from patharg import PathType
 
 Model = collections.namedtuple(
     'Model',
-    'article_id_to_id, id_to_article_id, article_vector, topic_vector, feature_names')
+    'article_id_to_id, id_to_article_id, article_vector, feature_names')
 
 
 def read_model(file):
@@ -42,26 +32,15 @@ def read_articles(indir):
     return result
 
 
-def make_term_frequency_model(articles, n_features=1000):
+# TODO: we should precompute all similarities as per
+#       https://stackoverflow.com/a/12128777, now we use the feature vectors
+def make_tfidf_model(articles, n_features=1000):
     # n_features is basically the number of words from the vocab to include
-    tf_vectorizer = CountVectorizer(max_df=0.95, min_df=2, max_features=n_features)
-    result = tf_vectorizer.fit_transform(articles)
-    print("Created a term-frequency model with shape", result.shape)
-    return result, tf_vectorizer.get_feature_names()
-
-
-def make_model(term_frequency_model, n_components=10):
-    lda = LatentDirichletAllocation(n_components=n_components, max_iter=5,
-                                    learning_method='online',
-                                    learning_offset=50.,
-                                    random_state=0)
-    lda = lda.fit(term_frequency_model)
-    # lda.components is a feature-topic matrix
-    #  (i.e. rows are topics, cols are features, i.e. words)
-    doc_topic_model = lda.transform(term_frequency_model)
-    print("Created an LDA model\n", lda)
-    print("Created a doc-topic-model of shape", doc_topic_model.shape)
-    return lda, doc_topic_model
+    tfidf_vectorizer = TfidfVectorizer(max_df=0.95, min_df=2, max_features=n_features)
+    # result is a term-document matrix
+    result = tfidf_vectorizer.fit_transform(articles)
+    print("Created a term-frequency-inverse-document-frequency model with shape", result.shape)
+    return result.toarray(), tfidf_vectorizer.get_feature_names()
 
 
 def build_model(indir):
@@ -78,26 +57,16 @@ def build_model(indir):
     contents_sorted_by_id = [b
                              for a, b in sorted(id_to_content.items(),
                                                 key=operator.itemgetter(0))]
-    term_doc_matrix, feature_names = make_term_frequency_model(contents_sorted_by_id)
+    term_doc_matrix, feature_names = make_tfidf_model(contents_sorted_by_id)
 
-    lda, doc_topic_model = make_model(term_doc_matrix)
     result = Model(article_id_to_id=article_id_to_id, id_to_article_id=id_to_article_id,
-                   article_vector=doc_topic_model, topic_vector=lda.components_,
-                   feature_names=feature_names)
+                   article_vector=term_doc_matrix, feature_names=feature_names)
     return result
 
 
 def write_model(file, model):
     pickle.dump(model, file)
     print('Model written to', file)
-
-
-def print_top_words(topic, topic_idx, feature_names, n_top_words):
-    # for topic_idx, topic in enumerate(model.components_):
-    message = "Topic #%d: " % topic_idx
-    message += " ".join([feature_names[i]
-       for i in topic.argsort()[:-n_top_words - 1:-1]])
-    print(message)
 
 
 def cosine_distances(term_doc_matrix, index):
@@ -137,10 +106,7 @@ if __name__ == '__main__':
         write_model(args.modelfile, model)
     elif args.command == 'query':
         model = read_model(args.model)
-        if args.function == 'topics':
-            for idx, topic in enumerate(model.topic_vector):
-                print_top_words(topic, idx, model.feature_names, 10)
-        elif args.function == 'articles':
+        if args.function == 'articles':
             for article_id in model.article_id_to_id.keys():
                 print(article_id)
         elif args.function == 'recommend':

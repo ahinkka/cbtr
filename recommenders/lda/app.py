@@ -24,7 +24,7 @@ def root(id=None):
         count = 10
 
     if id is None:
-        id = model_id_to_article_id[0]
+        id = model_.id_to_article_id[0]
 
     matrix_id = model_.article_id_to_id[id]
     recommendations = model.recommend(model_, matrix_id, count)

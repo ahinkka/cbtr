@@ -3,25 +3,15 @@ import os
 import pickle
 import random
 
-from scipy.spatial import distance
-
 import bottle
 from bottle import route, run, request
 
+import model
+from model import Model
+
 
 with open('model.pickle', 'rb') as f:
-    bundle = pickle.load(f)
-article_id_to_id, id_to_article_id, term_doc_matrix = bundle
-
-
-def cosine_distances(term_doc_matrix, index):
-    distances = []
-    for i in range(term_doc_matrix.shape[0]):
-        if i == index:
-            continue
-        distances.append((i, distance.cosine(term_doc_matrix[index],
-                                             term_doc_matrix[i])))
-    return distances
+    model_ = pickle.load(f)
 
 
 @route('/')
@@ -34,16 +24,16 @@ def root(id=None):
         count = 10
 
     if id is None:
-        id = id_to_article_id[0]
+        id = model_.id_to_article_id[0]
 
-    matrix_id = article_id_to_id[id]
-    cos_neighbors = sorted(cosine_distances(term_doc_matrix, matrix_id),
-                           key=operator.itemgetter(1), reverse=True)[0:count]
+    matrix_id = model_.article_id_to_id[id]
+    recommendations = model.recommend(model_, matrix_id, count)
 
-    for id, distance in cos_neighbors:
-        print('{} => {}: {}'.format(id_to_article_id[matrix_id], id_to_article_id[id], distance))
+    # for id, distance in recommendations:
+    #     print('{} => {}: {}'.format(model_.id_to_article_id[matrix_id],
+    #                                 model_.id_to_article_id[id], distance))
 
-    items = [id_to_article_id[id] for id, _ in cos_neighbors]
+    items = [model_.id_to_article_id[id] for id, _ in recommendations]
     return ','.join(items) + '\n'
 
 

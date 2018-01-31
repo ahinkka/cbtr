@@ -40,4 +40,3 @@ Prepare models:
 
 `python3 ../recommenders/random/make_model.py articles-cleaned ../recommenders/random/article_ids.txt`
 `python3 ../recommenders/tfidf/make_model.py articles-cleaned ../recommenders/tfidf/model.pickle`
-
