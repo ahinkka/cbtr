@@ -25,7 +25,6 @@ def write_article(outdir, article_name, contents):
         return
     with open(outfile, 'w') as f:
         print(contents, file=f)
-    # print(outdir, article_name, contents)
 
 
 def extract(input, outdir):
@@ -60,5 +59,3 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     extract(args.infile, args.outdir)
-
-    # categories = print_categories_inclusive(args.infile, args.searchterm)
