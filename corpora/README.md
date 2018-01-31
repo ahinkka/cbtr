@@ -20,7 +20,7 @@ Get the tool to extract raw text:
 
 Extract list of categories given a search string (to further extract only a subset of the corpus):
 
-`python3 list_categories_inclusive.py <term> > included_categories.txt`
+`python3 list_categories_inclusive.py <term> <xml-dump> > included_categories.txt`
 
 Extract the raw text for the corpus subset:
 
